@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/styles.css">
+    <title>Document</title>
+    <style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #fef3f3;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+    }
+    
+    .container {
+        max-width: 400px;
+        padding: 30px;
+        background-color: #ffffff;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        border-radius: 20px;
+        width: 100%;
+        font-size: 20;
+        font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    }
+
+    .completed-task {
+        text-decoration: line-through;
+        color: #a3a3a3;
+    }
+    .form-title {
+        text-align: center;
+        color: #ff6f91;
+        font-size: 24px;
+        margin-bottom: 20px;
+
+    }
+    ul.task-list {
+        list-style-type: none;
+        padding: 0;
+        margin-top: 20px;
+    }
+    ul.task-list li {
+        margin-top: 3px 0;
+        padding: 10px;
+        background-color: #ffe4e1;
+        border-radius: 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+        margin-bottom: 15px;
+    }
+    form {
+        display: inline;
+    }
+    input[type="text"] {
+        width: 75%;
+        padding: 8px;
+        margin-right: 10px;
+        border-radius: 4px;
+        border: 1px solid #ddd;
+    }
+    button:hover {
+        background-color: plum;
+    }
+</style>
+</head>
+<body>
+    <div class="container">
+        <h1>To-Do List</h1>
+<form action="/add-task" method="POST">
+    <input type="text" name="task" placeholder="Enter a new task" required><br><br>
+    <button type="submit">Add Task</button>
+</form>
+<ul class="task-list">
+    <% tasks.forEach((task, index) => { %>
+    <li class="<%= task.completed ? 'completed.task' : '' %>;">
+        <input type="checkbox"
+        <%= task.completed ? 'checked' : '' %>
+        onclick="toggleComplete(this)">
+        <%= task.text %>
+
+        <form action="/delete-task" method="POST" style="display:inline;">
+            <input type="hidden" name="index" value="<%= index %>">
+            <button type="submit">Delete</button>
+        </form>
+    </li>
+   <% }) %>
+</ul>
+</div>
+<script>
+    function toggleComplete(index) {
+        fetch('toggle-complete', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ index}),
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const checkbox = document.querySelector('input[type="checkbox"][onclick="toggleComplete(${index})"]');
+                const listItem = checkbox.parentElement;
+                if (checkbox.cheked) {
+                    listItem.classList.add('completed-task');
+                } else {
+                    listItem.classList.remove('completed-task');
+                }
+            } else {
+                console.error('Failed to update task');
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+</script>
